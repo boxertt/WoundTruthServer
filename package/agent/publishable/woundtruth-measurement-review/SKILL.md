@@ -1,13 +1,13 @@
 ---
 name: "woundtruth-measurement-review"
-version: "0.2.0"
 description: "Use when a clinician or engineer asks what was measured in the approved scope, with which tool, and on which source frames."
 license: Apache-2.0
 metadata:
   author: WoundTruth team
-  tags: [woundtruth, publishable, read-only, clinical-workspace, agent-skill]
+  version: "0.2.0"
+  tags: "woundtruth, publishable, read-only, clinical-workspace, agent-skill"
   layer: publishable
-  wraps_internal_tools: [get_measurements]
+  wraps_internal_tools: "get_measurements"
 ---
 
 # woundtruth-measurement-review

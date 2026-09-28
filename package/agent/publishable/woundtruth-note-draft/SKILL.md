@@ -1,13 +1,13 @@
 ---
 name: "woundtruth-note-draft"
-version: "0.1.0"
 description: "Use when a clinician asks for a note draft (handoff, documentation gap) based on the approved evidence scope."
 license: Apache-2.0
 metadata:
   author: WoundTruth team
-  tags: [woundtruth, publishable, read-only, clinical-workspace, agent-skill]
+  version: "0.1.0"
+  tags: "woundtruth, publishable, read-only, clinical-workspace, agent-skill"
   layer: publishable
-  wraps_internal_tools: [get_notes]
+  wraps_internal_tools: "get_notes"
 ---
 
 # woundtruth-note-draft

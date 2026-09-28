@@ -6,7 +6,7 @@ allowed-tools: Read Bash(python3 *)
 metadata:
   author: WoundTruth team
   version: 0.3.0
-  tags: [woundtruth, sam2, segmentation, measurement-preview, local-only]
+  tags: "woundtruth, sam2, segmentation, measurement-preview, local-only"
 ---
 
 # WoundTruth SAM2 measurement preview
@@ -36,9 +36,9 @@ Every preview response must preserve `clinicalWriteAllowed=false`. A successful 
 
 - Automatic SAM2 partitions visual regions; it does not know which region is a wound. The clinician supplies that semantic judgment by selecting a mask.
 - Guided SAM2 answers “which pixels follow this prompt,” not “where is the wound.”
-- Physical units come only from captured depth, calibrated intrinsics, a valid camera pose, and the shared `geometryV1` math.
+- Physical units come only from captured depth and calibrated intrinsics, in camera coordinates (`cameraSingleFrameV1`, `cameraMeters`, `coordinateSpace: camera`). This path uses a 16×16 prompt grid and does not use a world pose.
 - `candidate` means the fixed engineering gates passed. It does not mean clinically correct, diagnosed, signed, or automatically adoptable.
-- Confirmation creates an `area` measurement only after the server revalidates the frozen manifest, artifact hashes, frame pose, geometry and revision CAS. A visible clinician confirmation is the semantic authority; the model is not.
+- Confirmation creates an `area` measurement only after the server revalidates the frozen manifest, artifact hashes, frame identity, geometry and revision CAS. A visible clinician confirmation is the semantic authority; the model is not.
 - The current deployment has no verifiable per-person backend identity. Audit may truthfully record `actorRole=clinician` and `authentication=notAvailable`, but must not invent an actor ID or signature.
 - Keep local processing local. Never send the image, mask, boundary, depth, or clinical context to a cloud model.
 
@@ -47,7 +47,7 @@ Read [references/capability-contract.md](references/capability-contract.md) when
 ## Not for
 
 - autonomous wound detection, tissue classification, diagnosis, treatment, prescription, or prognosis;
-- measuring from RGB pixels or a mask without valid depth/calibration/pose;
+- measuring from RGB pixels or a mask without valid depth and calibration;
 - multi-component, holed, border-truncated, low-confidence, or prompt-unstable masks;
 - agent-initiated creation, modification, adoption, signing, retry, or deletion of a clinical record;
 - use by a Viewer to invoke inference or adopt results;

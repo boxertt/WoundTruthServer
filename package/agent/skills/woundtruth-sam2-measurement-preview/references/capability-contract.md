@@ -4,7 +4,7 @@
 
 - One server-authorized WoundTruth record and one metadata-array frame position.
 - Decodable stored RGB plus matching Float32 little-endian depth.
-- Intrinsics, positive intrinsics reference size, rigid camera-to-world transform, and `trackingState=normal`.
+- Intrinsics and a positive intrinsics reference size. The camera single-frame path (`cameraSingleFrameV1`) does not use a world pose and does not require a camera-to-world transform.
 - Confidence raster is required for an accepted candidate; without it, segmentation may be reviewed but metric acceptance is refused.
 - Automatic mode requires no target prompt and returns at most six quality-gated visual-region masks for explicit clinician selection.
 - Guided fallback requires one or more clinician-selected positive points, at least one clinician-selected negative point on nearby non-target tissue, and one clinician-selected box, expressed in raw stored RGB pixels.
@@ -13,7 +13,7 @@ The model may not supply record IDs, patient IDs, file paths, model paths, thres
 
 ## Fixed repeatability protocol
 
-Automatic mode uses a server-owned 32×32 prompt grid, model score filtering and duplicate suppression. Masks touching the image edge, containing holes, dominated by disconnected components, lacking complete confident boundary depth, or covering less than 0.05% or more than 40% of the RGB image are not offered. These rules make candidates reviewable; they do not identify wounds.
+Automatic mode uses a server-owned 16×16 prompt grid, model score filtering and duplicate suppression. Masks touching the image edge, containing holes, dominated by disconnected components, lacking complete confident boundary depth, or covering less than 0.05% or more than 40% of the RGB image are not offered. These rules make candidates reviewable; they do not identify wounds.
 
 Only when the clinician rejects all automatic candidates does guided mode begin:
 
@@ -32,10 +32,10 @@ For RGB-normalized boundary point `q=(x/Wrgb,y/Hrgb)`:
 - depth center: `xd=q.x*Wd-0.5`, `yd=q.y*Hd-0.5`;
 - metric pixel: `u=q.x*Wref`, `v=q.y*Href`;
 - depth: shared 5×5 bilinear candidate sampler, at least 8 valid candidates, sorted trim of two values at each end, then mean;
-- camera point: `((u-cx)d/fx, (cy-v)d/fy, -d)`;
-- world point: recorded column-major camera-to-world rigid transform;
+- camera point: `((u-cx)d/fx, (cy-v)d/fy, -d)`, stored as `cameraMeters` with `coordinateSpace: camera`;
+- this path does not apply a camera-to-world transform and does not write a world point;
 - area: Newell vector-area magnitude (projected planar area), not surface area;
-- perimeter: closed world-space boundary sum.
+- perimeter: closed camera-space boundary sum.
 
 Confidence is a separate gate and never changes the depth value, preserving cross-platform numeric parity.
 
@@ -73,12 +73,12 @@ The confirmation request contains only the protocol, server-issued candidate/tri
 
 1. lock the preview job and reject a second, different selection;
 2. verify the frozen manifest and the current hashes of the mask and overlay;
-3. re-check record integrity, exact frame scope, pose capability, and revision CAS;
+3. re-check record integrity, exact frame scope, and revision CAS;
 4. rebuild `geometryV1` from the frozen boundary samples and compare it with the frozen result;
 5. append one strict native-compatible `area` measurement through the ordinary revision write policy;
 6. record prepared and committed audit events with deterministic IDs and content hashes.
 
-The write is idempotent for the same job and selection. A conflict, changed artifact, missing geometry, failed gate, or invalid pose produces no measurement. The formal measurement carries a structured provenance note; the more detailed technical event remains in the server audit store because the cross-platform measurement schema is intentionally a strict whitelist.
+The write is idempotent for the same job and selection. A conflict, changed artifact, missing geometry, or failed gate produces no measurement. The formal measurement carries a structured provenance note; the more detailed technical event remains in the server audit store because the cross-platform measurement schema is intentionally a strict whitelist.
 
 Confirmation means “the clinician selected this boundary for measurement.” It is not a wound diagnosis, model validation, electronic signature, or claim that the geometry represents curved surface area.
 

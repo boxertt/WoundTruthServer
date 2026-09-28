@@ -1,13 +1,13 @@
 ---
 name: "woundtruth-record-review"
-version: "0.1.0"
 description: "Use when a clinician or engineer asks for a full review of the approved evidence scope: what was recorded, what was measured, what notes exist and whether the package is intact."
 license: Apache-2.0
 metadata:
   author: WoundTruth team
-  tags: [woundtruth, publishable, read-only, clinical-workspace, agent-skill]
+  version: "0.1.0"
+  tags: "woundtruth, publishable, read-only, clinical-workspace, agent-skill"
   layer: publishable
-  wraps_internal_tools: [get_record_overview, get_measurements, get_notes, get_integrity]
+  wraps_internal_tools: "get_record_overview, get_measurements, get_notes, get_integrity"
 ---
 
 # woundtruth-record-review

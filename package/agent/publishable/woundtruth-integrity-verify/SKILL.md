@@ -1,13 +1,13 @@
 ---
 name: "woundtruth-integrity-verify"
-version: "0.1.0"
 description: "Use when a clinician or engineer asks whether an evidence package is intact, traceable, or still matches its recorded revision state."
 license: Apache-2.0
 metadata:
   author: WoundTruth team
-  tags: [woundtruth, publishable, read-only, clinical-workspace, agent-skill]
+  version: "0.1.0"
+  tags: "woundtruth, publishable, read-only, clinical-workspace, agent-skill"
   layer: publishable
-  wraps_internal_tools: [get_integrity]
+  wraps_internal_tools: "get_integrity"
 ---
 
 # woundtruth-integrity-verify

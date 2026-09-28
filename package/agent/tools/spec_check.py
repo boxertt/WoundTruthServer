@@ -6,7 +6,9 @@ Checks the spec's structural rules that were missing from our generated artifact
   * `SKILL.md` body's FIRST section is `## Required questions` (官方心法第 2 条, 对照文档 §A2)
   * the official file set exists: SKILL.md / skill-card.md / skill_manifest.yaml /
     validators/output_schema.json / fixtures / evals / BENCHMARK.md / references
-  * frontmatter carries `name / version / description / license / metadata.{author,tags}`
+  * frontmatter carries only the official Agent Skills field set
+    (`name / description / license / compatibility / metadata / allowed-tools`) and
+    `metadata` carries `author / version / tags`
   * the manifest declares side effects explicitly (`side_effects: none`)
 
 Scope note (老夏 2026-09-20 18:19 §3 阻断项 B): this checker used to also walk the
@@ -17,10 +19,13 @@ publishable layer is checked here.
 Run from anywhere; it only reads (and reports). Needs `pyyaml` from
 `requirements-skills-dev.txt` (not a production dependency).
 """
+import re
 import sys
 from pathlib import Path
 
 BACKEND = Path(__file__).resolve().parents[1]
+OFFICIAL_FRONTMATTER_FIELDS = ("name", "description", "license", "compatibility",
+                              "metadata", "allowed-tools")
 SPEC_FILES_PUBLISHABLE = ("SKILL.md", "skill-card.md", "skill_manifest.yaml",
                           "validators/output_schema.json", "fixtures/README.md",
                           "evals/evals.json", "BENCHMARK.md", "references/README.md")
@@ -56,11 +61,17 @@ def report(name: str, directory: Path, spec_files: tuple) -> list:
         problems.append(f"{name}: first body section is {section!r}, spec requires '## Required questions'")
 
     front = frontmatter(text)
-    for key in ("name", "version", "description", "license"):
+    for key in ("name", "description", "license"):
         if key not in front:
             problems.append(f"{name}: frontmatter missing {key}")
-    if "author" not in text or "tags" not in text:
+    for key in sorted(set(front) - set(OFFICIAL_FRONTMATTER_FIELDS)):
+        problems.append(f"{name}: frontmatter field {key!r} is not part of the official "
+                        f"Agent Skills set {OFFICIAL_FRONTMATTER_FIELDS}")
+    block = text.split("---", 2)[1]
+    if "author" not in block or "tags" not in block:
         problems.append(f"{name}: metadata.author / metadata.tags missing")
+    if not re.search(r"^ {2}version:", block, re.M):
+        problems.append(f"{name}: metadata.version missing (the official frontmatter has no top-level version)")
 
     for relative in spec_files:
         if not (directory / relative).is_file():
