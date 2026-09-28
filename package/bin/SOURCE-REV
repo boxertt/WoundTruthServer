@@ -1,0 +1,6 @@
+branch=codex/web-geometry-audit-20260913
+commit=7b85553fbab23669c2fabcc8119763f3605021c1
+id=623d2444f35424cf88375e249ddcafd523ae2ca4b26ca574909cddbdf725fa6d
+tree=clean
+web=woundtruth-web
+worker=sam2-worker

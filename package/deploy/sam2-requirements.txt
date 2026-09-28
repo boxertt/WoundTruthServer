@@ -1,0 +1,8 @@
+# 与 GB10 上已跑通的 SAM2 环境一致。
+# torch、torchvision 由 deploy/up.sh 从 CUDA 13 索引安装，不要改到 PyPI 的默认轮子。
+# 索引：https://download.pytorch.org/whl/cu130
+# opencv-python-headless 从 PyPI 安装。工人启动时 import cv2，编译没有把它打进二进制。
+torch==2.9.1
+torchvision==0.24.1
+transformers==5.15.1
+opencv-python-headless==4.12.0.88

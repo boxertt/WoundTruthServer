@@ -1,0 +1,7 @@
+# Publishable skills this layer is allowed to expose.
+# 增删必须同提交改这里：发布面变窄/变宽都应当是一次被审过的显式变更。
+skills:
+  - woundtruth-record-review
+  - woundtruth-measurement-review
+  - woundtruth-integrity-verify
+  - woundtruth-note-draft

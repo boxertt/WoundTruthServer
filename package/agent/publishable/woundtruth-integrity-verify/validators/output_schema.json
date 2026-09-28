@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "woundtruth-integrity-verify output",
+  "type": "object",
+  "description": "the internal slice(s) returned unchanged by the adapter",
+  "additionalProperties": true
+}

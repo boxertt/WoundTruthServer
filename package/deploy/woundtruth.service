@@ -1,0 +1,25 @@
+[Unit]
+Description=WoundTruth web
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@ROOT@
+ExecStart=@ROOT@/bin/woundtruth-web
+Restart=on-failure
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
+Environment=WOUNDTRUTH_DATA_DIR=@ROOT@/data
+Environment=WOUNDTRUTH_STATIC_DIR=@ROOT@/web/dist
+Environment=WOUNDTRUTH_SAM2_PYTHON=@ROOT@/runtime/sam2-venv/bin/python
+Environment=WOUNDTRUTH_SAM2_WORKER=@ROOT@/bin/sam2-worker
+Environment=WOUNDTRUTH_SAM2_MODEL=@ROOT@/runtime/models/facebook-sam2.1-hiera-tiny
+Environment=HF_HUB_OFFLINE=1
+Environment=TRANSFORMERS_OFFLINE=1
+Environment=HF_DATASETS_OFFLINE=1
+Environment=NO_PROXY=*
+Environment=no_proxy=*
+
+[Install]
+WantedBy=default.target

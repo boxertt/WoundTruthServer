@@ -1,0 +1,12 @@
+创视迹 WoundTruth
+Copyright 2026 WoundTruth
+
+This product is licensed under the Apache License, Version 2.0.
+The full license text is in the LICENSE file at the repository root.
+
+Third-party material kept under its own license:
+
+- package/bin/woundtruth-web.dist/certifi/cacert.pem
+  Mozilla CA certificate bundle, as shipped by the certifi project.
+  This bundle remains under the Mozilla Public License, Version 2.0.
+  https://www.mozilla.org/MPL/2.0/
