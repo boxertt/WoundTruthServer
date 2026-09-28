@@ -5,7 +5,7 @@
 - One server-authorized WoundTruth record and one metadata-array frame position.
 - Decodable stored RGB plus matching Float32 little-endian depth.
 - Intrinsics and a positive intrinsics reference size. The camera single-frame path (`cameraSingleFrameV1`) does not use a world pose and does not require a camera-to-world transform.
-- Confidence raster is required for an accepted candidate; without it, segmentation may be reviewed but metric acceptance is refused.
+- A confidence raster is not required on the camera single-frame path. Without it, `boundaryConfidenceFraction` stays empty and metric acceptance can still succeed when the other gates pass. The older world-pose path refuses metric acceptance when the raster is missing.
 - Automatic mode requires no target prompt and returns at most six quality-gated visual-region masks for explicit clinician selection.
 - Guided fallback requires one or more clinician-selected positive points, at least one clinician-selected negative point on nearby non-target tissue, and one clinician-selected box, expressed in raw stored RGB pixels.
 
