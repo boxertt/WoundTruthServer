@@ -26,6 +26,7 @@ from pathlib import Path
 BACKEND = Path(__file__).resolve().parents[1]
 OFFICIAL_FRONTMATTER_FIELDS = ("name", "description", "license", "compatibility",
                               "metadata", "allowed-tools")
+
 SPEC_FILES_PUBLISHABLE = ("SKILL.md", "skill-card.md", "skill_manifest.yaml",
                           "validators/output_schema.json", "fixtures/README.md",
                           "evals/evals.json", "BENCHMARK.md", "references/README.md")

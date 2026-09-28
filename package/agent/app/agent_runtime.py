@@ -116,6 +116,21 @@ def tool_specs() -> list[dict]:
     ]
 
 
+def skill_surface() -> dict:
+    """The agent's skill surface, exactly as this runtime will use it.
+
+    Read-only view served by the API so the published layer (`publishable/*/SKILL.md`)
+    can be checked against the runtime that answers clinical questions, without trusting a
+    document. Pure in-memory: no package, file or network I/O happens here.
+    """
+    return {
+        "primarySkill": PRIMARY_SKILL,
+        "evidencePlan": list(EVIDENCE_PLAN),
+        "skills": [{"name": name, "description": spec["description"]}
+                   for name, spec in SKILLS.items()],
+    }
+
+
 def dispatch(name, arguments, document):
     """Return ``(result, allowed)``. Only registered skills with empty-object arguments pass."""
     spec = SKILLS.get(name)
