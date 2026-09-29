@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WoundTruth SAM2 automatic candidate response",
+  "type": "object",
+  "required": ["schemaVersion", "protocol", "status", "clinicalWriteAllowed", "candidates", "assessment"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "protocol": {"const": "automaticCandidatesV1"},
+    "status": {"const": "experimentalPreviewOnly"},
+    "clinicalWriteAllowed": {"const": false},
+    "candidates": {
+      "type": "array", "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["id", "mask", "geometry", "measurementCandidate", "artifacts"],
+        "properties": {
+          "id": {"pattern": "^candidate-[1-6]$"},
+          "measurementCandidate": {
+            "type": "object",
+            "required": ["status", "areaCm2", "perimeterCm", "clinicalWriteAllowed"],
+            "properties": {
+              "status": {"const": "engineeringCandidateOnly"},
+              "areaCm2": {"type": "number", "exclusiveMinimum": 0},
+              "perimeterCm": {"type": "number", "exclusiveMinimum": 0},
+              "clinicalWriteAllowed": {"const": false}
+            }
+          }
+        }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "required": ["status", "candidateCount", "clinicalWriteAllowed"],
+      "properties": {
+        "status": {"enum": ["selectionRequired", "empty"]},
+        "candidateCount": {"type": "integer", "minimum": 0, "maximum": 6},
+        "clinicalWriteAllowed": {"const": false}
+      }
+    }
+  }
+}

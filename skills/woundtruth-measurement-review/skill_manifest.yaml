@@ -1,0 +1,62 @@
+# Publishable skill contract (老夏 LAOXIA_DECISION_AGENT_SKILLS_20260920_165253 §3/§4).
+id: woundtruth.woundtruth_measurement_review
+name: woundtruth-measurement-review
+description: "Use when a clinician or engineer asks what was measured in the approved scope, with which tool, and on which source frames."
+version: 0.2.0
+license: Apache-2.0
+layer: publishable
+status: candidate
+wraps_internal_tool: get_measurements
+
+intended_use:
+  summary: "Read and explain the recorded measurements (tool, name, distanceCm/areaCm2, source frames, point counts, attached notes)."
+  scope: publishable-read-only
+  not_for:
+    - "诊断、治疗决策、处方或任何自主临床决策"
+    - "从彩图像素或模型 Mask 直接推导物理尺寸、面积、深度或体积"
+    - "在没有有效深度、标定和统一几何合同时输出厘米、平方厘米或体积"
+    - "把模型输出称为监管意义上的匿名化或去标识化结果"
+    - "未经医生逐次确认，新增、修改、采纳、签名或删除临床记录"
+    - "访问服务端批准范围之外的患者、记录或文件"
+    - "把患者数据发送到云端；当前临床数据推理只允许本地模型"
+    - "把 WREC 签名等同于内容医学正确，或等同于本 Skill 本身安全"
+    - "把输出当作诊断结论；输出只定位为临床文书辅助与工程验证材料"
+    - "只报已保存的测量值；单位错误必须指出而不是换算成物理量"
+    - "把 distanceCm（长度）改名、换算或解释成 areaCm2（面积）"
+    - "在 areaCm2 缺失或为 null 时用其他数字（长度、点距、图像估算、假设形状）充当面积"
+    - "跨维度换算：长度变面积、面积变体积，即使用户要求或假设形状（例如当作正方形）"
+    - "输出数值不标注来源字段/测量工具/单位，或在字段与单位冲突时继续输出"
+    - "把 line / curve / depthProfile 的长度作为面积证据；只有已保存的 areaCm2 才算面积"
+
+supply_chain:
+  read_only: true
+  network: none
+  filesystem: none
+  arguments: none                # 患者/记录范围由可信层注入；模型不能传 patient_id/record_id/路径
+  handler: adapter               # 由 tools/run-woundtruth-skill.sh 解析，直接调用生产 app.agent_runtime.dispatch
+  snapshot_source: stdin         # 临床路径只从 stdin 读冻结快照；文件路径仅 tests/fixtures 下的合成夹具
+
+side_effects: none               # 不写盘、不联网、不读文件系统、不发起模型请求
+
+gates:                           # 本技能的硬门（机器可核对）
+  - the adapter returns every wrapped slice; a partial read is an error, never a draft
+  - distanceCm is a length; it is never renamed, converted or explained as an area
+
+inputs:
+  - name: required_questions
+    type: list
+    items:
+      - id: q1
+        question: "Which approved scope?"
+        resolved_by: scope-or-physician
+      - id: q2
+        question: "Recorded values, or new measurements?"
+        resolved_by: scope-or-physician
+  - name: snapshot_document
+    type: json
+    description: The request-scoped frozen evidence snapshot produced by the trusted server layer.
+
+outputs:
+  - name: measurements
+    type: json
+    description: the internal slice(s), returned unchanged by the adapter

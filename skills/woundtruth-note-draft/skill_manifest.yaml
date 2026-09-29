@@ -1,0 +1,55 @@
+# Publishable skill contract (老夏 LAOXIA_DECISION_AGENT_SKILLS_20260920_165253 §3/§4).
+id: woundtruth.woundtruth_note_draft
+name: woundtruth-note-draft
+description: "Use when a clinician asks for a note draft (handoff, documentation gap) based on the approved evidence scope."
+version: 0.1.0
+license: Apache-2.0
+layer: publishable
+status: candidate
+wraps_internal_tool: get_notes
+
+intended_use:
+  summary: "Draft a clinical note from the approved evidence scope. The draft is never a record: a physician must confirm and adopt it, one at a time."
+  scope: publishable-read-only
+  not_for:
+    - "诊断、治疗决策、处方或任何自主临床决策"
+    - "从彩图像素或模型 Mask 直接推导物理尺寸、面积、深度或体积"
+    - "在没有有效深度、标定和统一几何合同时输出厘米、平方厘米或体积"
+    - "把模型输出称为监管意义上的匿名化或去标识化结果"
+    - "未经医生逐次确认，新增、修改、采纳、签名或删除临床记录"
+    - "访问服务端批准范围之外的患者、记录或文件"
+    - "把患者数据发送到云端；当前临床数据推理只允许本地模型"
+    - "把 WREC 签名等同于内容医学正确，或等同于本 Skill 本身安全"
+    - "把输出当作诊断结论；输出只定位为临床文书辅助与工程验证材料"
+    - "只产出草稿；采纳需要医生逐次确认，Viewer 无权采纳、签名或写入。"
+
+supply_chain:
+  read_only: true
+  network: none
+  filesystem: none
+  arguments: none                # 患者/记录范围由可信层注入；模型不能传 patient_id/record_id/路径
+  handler: adapter               # 由 tools/run-woundtruth-skill.sh 解析，直接调用生产 app.agent_runtime.dispatch
+
+side_effects: none               # 不写盘、不联网、不读文件系统、不发起模型请求
+
+gates:                           # 本技能的硬门（机器可核对）
+  - the adapter returns every wrapped slice; a partial read is an error, never a draft
+
+inputs:
+  - name: required_questions
+    type: list
+    items:
+      - id: q1
+        question: "Which approved scope, and what kind of draft?"
+        resolved_by: scope-or-physician
+      - id: q2
+        question: "Who will adopt it?"
+        resolved_by: scope-or-physician
+  - name: snapshot_document
+    type: json
+    description: The request-scoped frozen evidence snapshot produced by the trusted server layer.
+
+outputs:
+  - name: patientNotes
+    type: json
+    description: the internal slice(s), returned unchanged by the adapter

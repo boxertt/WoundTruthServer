@@ -1,0 +1,74 @@
+id: woundtruth.woundtruth_sam2_measurement_preview
+name: woundtruth-sam2-measurement-preview
+description: Local SAM2 automatic region selection with clinician-guided refinement and RGB-depth geometryV1 measurement.
+version: 0.3.0
+license: Apache-2.0
+status: candidate
+layer: publishable-workflow
+
+intended_use:
+  summary: Generate reviewable mask overlays and guide the explicit clinician-confirmation boundary for a formal geometryV1 measurement.
+  scope: local-preview-and-clinician-confirmation
+  not_for:
+    - autonomous wound detection or diagnosis
+    - treatment, prescription or prognosis
+    - RGB-pixel-only physical measurement
+    - agent-initiated clinical write-back or adoption
+    - viewer inference or adoption
+    - cloud processing of patient data
+    - clinical, regulatory or NVIDIA Verified claims
+
+runtime:
+  automatic_route: /api/records/{trusted_record_id}/frames/{trusted_position}/sam2/candidates
+  guided_route: /api/records/{trusted_record_id}/frames/{trusted_position}/sam2/preview
+  protocols: [automaticCandidatesV1, promptSensitivityV1]
+  model_family: SAM2.1 Hiera Tiny
+  network: none
+  gpu: required
+  model_scope: locally configured by the trusted host
+
+inputs:
+  trusted_scope:
+    supplied_by: server
+    model_controllable: false
+  automatic:
+    prompt: none
+    clinician_selection_required: true
+    maximum_candidates: 6
+  guided_prompt:
+    coordinate_space: raw-rgb-pixels
+    required: [positivePoints, negativePoints, box]
+  forbidden_from_model: [patient_id, record_id, file_path, model_path, output_path, threshold, url]
+
+outputs:
+  automatic_schema: validators/automatic_output_schema.json
+  guided_schema: validators/output_schema.json
+  clinical_write_allowed: false
+  artifacts: [mask_png, overlay_jpeg]
+  structured: [automatic_candidates, clinician_selection, trial_results, stability, refusal_reasons, measurement_candidate]
+
+confirmation:
+  route: /api/records/{trusted_record_id}/sam2/previews/{trusted_job_id}/confirm
+  authority: explicit-clinician-ui-action-only
+  geometry_source: frozen-server-candidate
+  revision_control: compare-and-swap
+  idempotent: same-job-and-selection
+  agent_may_invoke: false
+
+side_effects:
+  clinical_write: explicit-clinician-confirmation-only
+  source_write: none
+  network: none
+  local_gpu_inference: true
+  ephemeral_artifact_write: backend-jobs-only
+  audit_write: prepared-and-committed-events
+
+gates:
+  - integrity must not be invalid
+  - exact frame tracking state must be normal
+  - depth, calibration and rigid pose must be valid
+  - confidence raster is required for candidate acceptance
+  - automatic candidates must pass fixed topology, size, depth and plane gates
+  - automatic masks require explicit clinician selection
+  - three fixed prompt-sensitivity trials must all pass
+  - failed trials are never averaged into a candidate
